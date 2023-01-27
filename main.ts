@@ -15,6 +15,8 @@ input.onButtonPressed(Button.A, function () {
 input.onGesture(Gesture.TiltLeft, function () {
     serial.writeLine("l:1")
     serial.writeLine("r:0")
+    basic.pause(200)
+    serial.writeLine("l:0")
 })
 input.onButtonPressed(Button.B, function () {
     b = b + 1
@@ -27,6 +29,8 @@ input.onButtonPressed(Button.B, function () {
 input.onGesture(Gesture.TiltRight, function () {
     serial.writeLine("r:1")
     serial.writeLine("l:0")
+    basic.pause(200)
+    serial.writeLine("r:0")
 })
 input.onLogoEvent(TouchButtonEvent.Touched, function () {
     serial.writeLine("t:-1")
@@ -36,7 +40,3 @@ input.onPinReleased(TouchPin.P1, function () {
 })
 let a = 0
 let b = 0
-basic.forever(function () {
-    b = input.acceleration(Dimension.Z)
-    serial.writeLine("" + (b.toString()))
-})
