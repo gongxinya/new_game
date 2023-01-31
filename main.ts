@@ -1,42 +1,77 @@
-input.onPinReleased(TouchPin.P2, function () {
-    serial.writeLine("h:5")
+control.onEvent(EventBusSource.MICROBIT_ID_BUTTON_A, EventBusValue.MICROBIT_BUTTON_EVT_UP, function () {
+    weaponVol = 0
+    serial.writeLine("" + weapon + ":0")
 })
-input.onPinReleased(TouchPin.P0, function () {
-    serial.writeLine("h:1")
+control.onEvent(EventBusSource.MICROBIT_ID_BUTTON_A, EventBusValue.MICROBIT_BUTTON_EVT_DOWN, function () {
+    weaponVol = 1
+    while (weaponVol == 1) {
+        music.setVolume(10)
+        music.playTone(622, music.beat(BeatFraction.Sixteenth))
+        basic.pause(200)
+    }
+    serial.writeLine("" + weapon + ":1")
+    basic.pause(200)
 })
-input.onButtonPressed(Button.A, function () {
+// Press to toggle pause
+input.onButtonPressed(Button.AB, function () {
+    serial.writeLine("p:1")
+})
+// Press to shield on or shield off
+input.onButtonPressed(Button.B, function () {
+    serial.writeLine("s:1")
+    basic.pause(200)
+    serial.writeLine("s:0")
+})
+// Press to switch the weapon
+input.onLogoEvent(TouchButtonEvent.Pressed, function () {
     a = a + 1
     if (a % 2 == 1) {
-        serial.writeLine("a:1")
+        weapon = "b"
     } else {
-        serial.writeLine("a:0")
+        weapon = "a"
     }
 })
-input.onGesture(Gesture.TiltLeft, function () {
-    serial.writeLine("l:1")
-    serial.writeLine("r:0")
-    basic.pause(200)
-    serial.writeLine("l:0")
+serial.onDataReceived(serial.readLine(), function () {
+	
 })
-input.onButtonPressed(Button.B, function () {
-    b = b + 1
-    if (b % 2 == 1) {
-        serial.writeLine("b:1")
-    } else {
-        serial.writeLine("b:0")
-    }
-})
-input.onGesture(Gesture.TiltRight, function () {
-    serial.writeLine("r:1")
-    serial.writeLine("l:0")
-    basic.pause(200)
-    serial.writeLine("r:0")
-})
-input.onLogoEvent(TouchButtonEvent.Touched, function () {
-    serial.writeLine("t:-1")
-})
-input.onPinReleased(TouchPin.P1, function () {
-    serial.writeLine("h:3")
-})
+let roll = 0
+let pitch = 0
 let a = 0
-let b = 0
+let weaponVol = 0
+let weapon = ""
+let score = ""
+let receivedVal
+weapon = "a"
+basic.forever(function () {
+    pitch = input.rotation(Rotation.Pitch)
+    roll = input.rotation(Rotation.Roll)
+    // Thurst
+    if (pitch < -15) {
+        serial.writeLine("t:-1")
+        basic.pause(200)
+        serial.writeLine("t:0")
+    } else if (pitch > 15) {
+        serial.writeLine("t:1")
+        basic.pause(200)
+        serial.writeLine("t:0")
+    } else {
+        serial.writeLine("t:0")
+    }
+    // Turn left or turn right
+    if (roll < -15) {
+        serial.writeLine("l:1")
+        basic.pause(200)
+        serial.writeLine("l:0")
+    } else if (pitch > 15) {
+        serial.writeLine("r:1")
+        basic.pause(200)
+        serial.writeLine("r:0")
+    } else {
+        serial.writeLine("l:0")
+        serial.writeLine("r:0")
+    }
+    receivedVal = serial.readLine().split(":")
+    if (receivedVal[0] == "l") {
+        basic.showString("" + (receivedVal[1]))
+    }
+})
